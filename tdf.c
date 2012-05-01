@@ -1,7 +1,7 @@
-/*  tdf.c - a text file differencer
- *  by Urs Thuermann
- *  started: 13.09.1990
- *  last modified: 21.03.1992
+/*
+ *  $Id: tdf.c,v 1.2 2012/05/01 06:03:46 urs Exp $
+ *
+ *  A text file differencer
  */
 
 #include <stdio.h>
@@ -14,20 +14,17 @@
 #define SIZE (10 * 1024L)
 
 typedef struct line LINE;
-struct line
-{
+struct line {
 	LINE *next;
 	char text[MAXLINE];
 };
 
-typedef struct
-{
+typedef struct {
 	unsigned line_count;
 	LINE *root;
 	LINE *at;
 	FILE *fp;
 } FD;
-
 
 void diff(char *oldfilename, char *newfilename);
 void resync(LINE *first, LINE *second);
@@ -40,56 +37,45 @@ void report(LINE *del, LINE *add);
 void deleted(LINE *line);
 void added(LINE *line);
 
-
 FD oldfile = { 0, NULL, NULL, NULL };
 FD newfile = { 0, NULL, NULL, NULL };
 
-int no_blanks = 0;
-int no_case = 0;
+int no_blanks  = 0;
+int no_case    = 0;
 int sed_script = 0;
 
-int re_sync = 2;
-int lookahead = 200;
-
+int re_sync    = 2;
+int lookahead  = 200;
 
 int main(int argc, char **argv)
 {
 	char *oldfilename = NULL, *newfilename = NULL;
 
-	while (++argv, --argc)
-	{
+	while (++argv, --argc) {
 		if (**argv == '-')
-			switch (tolower(*++*argv))
-			{
+			switch (tolower(*++*argv)) {
 			case 'b':
 				no_blanks = 1;
 				break;
-
 			case 'i':
 				no_case = 1;
 				break;
-
 			case 'e':
 				sed_script = 1;
 				break;
-
 			case 'r':
 				re_sync = atoi(*argv + 1);
 				break;
-
 			case 'l':
 				lookahead = atoi(*argv + 1);
 				break;
-
 			default:
 				break;
 			}
-		else if (newfilename)
-		{
+		else if (newfilename) {
 			fprintf(stderr, "Usage: diff [-b -i -e -rnum] oldfile newfile\n");
 			exit(1);
-		}
-		else if (oldfilename)
+		} else if (oldfilename)
 			newfilename = *argv;
 		else
 			oldfilename = *argv;
@@ -100,34 +86,29 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-
 void diff(char *oldfilename, char *newfilename)
 {
 	LINE *first, *second;
 
-	if (!(oldfile.fp = fopen(oldfilename, "r")))
-	{
+	if (!(oldfile.fp = fopen(oldfilename, "r"))) {
 		fprintf(stderr, "Can't open %s\n", oldfilename);
 		exit(1);
 	}
-	if (!(newfile.fp = fopen(newfilename, "r")))
-	{
+	if (!(newfile.fp = fopen(newfilename, "r"))) {
 		fprintf(stderr, "Can't open %s\n", newfilename);
 		exit(1);
 	}
 	setvbuf(oldfile.fp, NULL, _IOFBF, SIZE);
 	setvbuf(newfile.fp, NULL, _IOFBF, SIZE);
 
-	while (1)
-	{
-		first = nextline(&oldfile);
+	while (1) {
+		first  = nextline(&oldfile);
 		second = nextline(&newfile);
 
 		discard(&oldfile, first);
 		discard(&newfile, second);
 
-		if (!first || !second)
-		{
+		if (!first || !second) {
 			report(NULL, NULL);
 			break;
 		}
@@ -137,7 +118,6 @@ void diff(char *oldfilename, char *newfilename)
 	}
 }
 
-
 void resync(LINE *first, LINE *second)
 {
 	LINE *file1, *file2, *ahead1, *ahead2;
@@ -146,16 +126,14 @@ void resync(LINE *first, LINE *second)
 	ahead1 = first;
 	ahead2 = second;
 
-	for (i = 0; i < lookahead; i++)
-	{
+	for (i = 0; i < lookahead; i++) {
 		if (!ahead1 && !ahead2)
 			goto eof;
 
 		oldfile.at = first;
 		newfile.at = second;
 
-		for (j = 0; j < i; j++)
-		{
+		for (j = 0; j < i; j++) {
 			file1 = oldfile.at;
 			file2 = ahead2;
 			if (match(file1, file2))
@@ -192,7 +170,6 @@ synced:
 	return;
 }
 
-
 int match(LINE *a, LINE *b)
 {
 	LINE *x, *y;
@@ -204,10 +181,8 @@ int match(LINE *a, LINE *b)
 	oldfile.at = a;
 	newfile.at = b;
 
-	for (i = 0; i < re_sync; i++)
-	{
-		if (!equal(a, b))
-		{
+	for (i = 0; i < re_sync; i++) {
+		if (!equal(a, b)) {
 			ret = 0;
 			break;
 		}
@@ -221,7 +196,6 @@ int match(LINE *a, LINE *b)
 	return ret;
 }
 
-
 int equal(LINE *a, LINE *b)
 {
 	if (a == NULL || b == NULL)
@@ -232,13 +206,11 @@ int equal(LINE *a, LINE *b)
 		return !strcmp(a->text, b->text);
 }
 
-
 void discard(FD *file, LINE *line)
 {
 	LINE *temp, *next;
 
-	for (temp = file->root; temp != line; temp = next)
-	{
+	for (temp = file->root; temp != line; temp = next) {
 		next = temp->next;
 		free(temp);
 		file->line_count++;
@@ -246,36 +218,28 @@ void discard(FD *file, LINE *line)
 	file->root = file->at = temp;
 }
 
-
 LINE *nextline(FD *file)
 {
-	if (file->at)
-	{
+	if (file->at) {
 		if (!file->at->next)
 			file->at->next = getline(file);
 		return file->at = file->at->next;
-	}
-	else
-		if (!file->root)
-		{
-			file->root = file->at = getline(file);
-			return file->at;
-		}
-		else
-			return NULL;
+	} else if (!file->root) {
+		file->root = file->at = getline(file);
+		return file->at;
+	} else
+		return NULL;
 }
 
 LINE *getline(FD *file)
 {
 	LINE *line;
 
-	if (!(line = malloc(sizeof(LINE))))
-	{
+	if (!(line = malloc(sizeof(LINE)))) {
 		fprintf(stderr, "Out of memory.\n");
 		exit(2);
 	}
-	if (!fgets(line->text, MAXLINE, file->fp))
-	{
+	if (!fgets(line->text, MAXLINE, file->fp)) {
 		free(line);
 		return NULL;
 	}
@@ -283,7 +247,6 @@ LINE *getline(FD *file)
 
 	return line;
 }
-
 
 void report(LINE *del, LINE *add)
 {
@@ -313,7 +276,6 @@ void report(LINE *del, LINE *add)
 	added(add);
 }
 
-
 void deleted(LINE *line)
 {
 	LINE *temp;
@@ -321,7 +283,6 @@ void deleted(LINE *line)
 	for (temp = oldfile.root; temp != line; temp = temp->next)
 		printf("< %s", temp->text);
 }
-
 
 void added(LINE *line)
 {
