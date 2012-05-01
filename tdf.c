@@ -1,5 +1,5 @@
 /*
- *  $Id: tdf.c,v 1.8 2012/05/01 06:05:17 urs Exp $
+ *  $Id: tdf.c,v 1.9 2012/05/01 06:05:27 urs Exp $
  *
  *  A text file differencer
  */
@@ -240,7 +240,7 @@ static LINE *getline(FD *file)
 
 	if (!(line = malloc(sizeof(LINE)))) {
 		fprintf(stderr, "Out of memory.\n");
-		exit(2);
+		exit(1);
 	}
 	if (!fgets(line->text, MAXLINE, file->fp)) {
 		free(line);
