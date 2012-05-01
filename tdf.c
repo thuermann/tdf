@@ -1,5 +1,5 @@
 /*
- *  $Id: tdf.c,v 1.3 2012/05/01 06:04:27 urs Exp $
+ *  $Id: tdf.c,v 1.4 2012/05/01 06:04:37 urs Exp $
  *
  *  A text file differencer
  */
@@ -26,26 +26,26 @@ typedef struct {
 	FILE *fp;
 } FD;
 
-void diff(char *oldfilename, char *newfilename);
-void resync(LINE *first, LINE *second);
-int match(LINE *a, LINE *b);
-int equal(LINE *a, LINE *b);
-void discard(FD *file, LINE *line);
-LINE *nextline(FD *file);
-LINE *getline(FD *file);
-void report(LINE *del, LINE *add);
-void deleted(LINE *line);
-void added(LINE *line);
+static void diff(const char *oldfilename, const char *newfilename);
+static void resync(LINE *first, LINE *second);
+static int match(LINE *a, LINE *b);
+static int equal(const LINE *a, const LINE *b);
+static void discard(FD *file, const LINE *line);
+static LINE *nextline(FD *file);
+static LINE *getline(FD *file);
+static void report(const LINE *del, const LINE *add);
+static void deleted(const LINE *line);
+static void added(const LINE *line);
 
-FD oldfile = { 0, NULL, NULL, NULL };
-FD newfile = { 0, NULL, NULL, NULL };
+static FD oldfile = { 0, NULL, NULL, NULL };
+static FD newfile = { 0, NULL, NULL, NULL };
 
-int no_blanks  = 0;
-int no_case    = 0;
-int sed_script = 0;
+static int no_blanks  = 0;
+static int no_case    = 0;
+static int sed_script = 0;
 
-int re_sync    = 2;
-int lookahead  = 200;
+static int re_sync    = 2;
+static int lookahead  = 200;
 
 int main(int argc, char **argv)
 {
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-void diff(char *oldfilename, char *newfilename)
+static void diff(const char *oldfilename, const char *newfilename)
 {
 	LINE *first, *second;
 
@@ -118,7 +118,7 @@ void diff(char *oldfilename, char *newfilename)
 	}
 }
 
-void resync(LINE *first, LINE *second)
+static void resync(LINE *first, LINE *second)
 {
 	LINE *file1, *file2, *ahead1, *ahead2;
 	int i, j;
@@ -168,7 +168,7 @@ synced:
 	newfile.at = file2;
 }
 
-int match(LINE *a, LINE *b)
+static int match(LINE *a, LINE *b)
 {
 	LINE *x, *y;
 	int i, ret = 1;
@@ -194,7 +194,7 @@ int match(LINE *a, LINE *b)
 	return ret;
 }
 
-int equal(LINE *a, LINE *b)
+static int equal(const LINE *a, const LINE *b)
 {
 	if (a == NULL || b == NULL)
 		return 0;
@@ -204,7 +204,7 @@ int equal(LINE *a, LINE *b)
 		return !strcmp(a->text, b->text);
 }
 
-void discard(FD *file, LINE *line)
+static void discard(FD *file, const LINE *line)
 {
 	LINE *temp, *next;
 
@@ -216,7 +216,7 @@ void discard(FD *file, LINE *line)
 	file->root = file->at = temp;
 }
 
-LINE *nextline(FD *file)
+static LINE *nextline(FD *file)
 {
 	if (file->at) {
 		if (!file->at->next)
@@ -229,7 +229,7 @@ LINE *nextline(FD *file)
 		return NULL;
 }
 
-LINE *getline(FD *file)
+static LINE *getline(FD *file)
 {
 	LINE *line;
 
@@ -246,7 +246,7 @@ LINE *getline(FD *file)
 	return line;
 }
 
-void report(LINE *del, LINE *add)
+static void report(const LINE *del, const LINE *add)
 {
 	int ndel = 0, nadd = 0;
 
@@ -274,7 +274,7 @@ void report(LINE *del, LINE *add)
 	added(add);
 }
 
-void deleted(LINE *line)
+static void deleted(const LINE *line)
 {
 	LINE *temp;
 
@@ -282,7 +282,7 @@ void deleted(LINE *line)
 		printf("< %s", temp->text);
 }
 
-void added(LINE *line)
+static void added(const LINE *line)
 {
 	LINE *temp;
 
