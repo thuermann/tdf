@@ -1,5 +1,5 @@
 /*
- *  $Id: tdf.c,v 1.6 2012/05/01 06:04:57 urs Exp $
+ *  $Id: tdf.c,v 1.7 2012/05/01 06:05:07 urs Exp $
  *
  *  A text file differencer
  */
@@ -17,8 +17,6 @@ static void usage(const char *name)
 }
 
 #define MAXLINE 100
-
-#define SIZE (10 * 1024L)
 
 typedef struct line LINE;
 struct line {
@@ -107,8 +105,6 @@ static void diff(const char *oldfilename, const char *newfilename)
 		fprintf(stderr, "Can't open %s\n", newfilename);
 		exit(1);
 	}
-	setvbuf(oldfile.fp, NULL, _IOFBF, SIZE);
-	setvbuf(newfile.fp, NULL, _IOFBF, SIZE);
 
 	while (1) {
 		first  = nextline(&oldfile);
