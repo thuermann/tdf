@@ -1,5 +1,5 @@
 /*
- *  $Id: tdf.c,v 1.5 2012/05/01 06:04:47 urs Exp $
+ *  $Id: tdf.c,v 1.6 2012/05/01 06:04:57 urs Exp $
  *
  *  A text file differencer
  */
@@ -208,7 +208,7 @@ static int equal(const LINE *a, const LINE *b)
 	if (a == NULL || b == NULL)
 		return 0;
 	if (no_case)
-		return !stricmp(a->text, b->text);
+		return !strcasecmp(a->text, b->text);
 	else
 		return !strcmp(a->text, b->text);
 }
