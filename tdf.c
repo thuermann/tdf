@@ -1,5 +1,5 @@
 /*
- *  $Id: tdf.c,v 1.2 2012/05/01 06:03:46 urs Exp $
+ *  $Id: tdf.c,v 1.3 2012/05/01 06:04:27 urs Exp $
  *
  *  A text file differencer
  */
@@ -166,8 +166,6 @@ synced:
 
 	oldfile.at = file1;
 	newfile.at = file2;
-
-	return;
 }
 
 int match(LINE *a, LINE *b)
