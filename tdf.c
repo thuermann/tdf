@@ -1,5 +1,5 @@
 /*
- *  $Id: tdf.c,v 1.7 2012/05/01 06:05:07 urs Exp $
+ *  $Id: tdf.c,v 1.8 2012/05/01 06:05:17 urs Exp $
  *
  *  A text file differencer
  */
@@ -98,11 +98,11 @@ static void diff(const char *oldfilename, const char *newfilename)
 	LINE *first, *second;
 
 	if (!(oldfile.fp = fopen(oldfilename, "r"))) {
-		fprintf(stderr, "Can't open %s\n", oldfilename);
+		perror(oldfilename);
 		exit(1);
 	}
 	if (!(newfile.fp = fopen(newfilename, "r"))) {
-		fprintf(stderr, "Can't open %s\n", newfilename);
+		perror(newfilename);
 		exit(1);
 	}
 
