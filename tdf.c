@@ -1,5 +1,5 @@
 /*
- *  $Id: tdf.c,v 1.4 2012/05/01 06:04:37 urs Exp $
+ *  $Id: tdf.c,v 1.5 2012/05/01 06:04:47 urs Exp $
  *
  *  A text file differencer
  */
@@ -8,6 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
+#include <unistd.h>
+
+static void usage(const char *name)
+{
+	fprintf(stderr, "Usage: %s [-bie] [-r num] file1 file2\n", name);
+}
 
 #define MAXLINE 100
 
@@ -50,36 +57,38 @@ static int lookahead  = 200;
 int main(int argc, char **argv)
 {
 	char *oldfilename = NULL, *newfilename = NULL;
+	int errflag = 0;
+	int opt;
 
-	while (++argv, --argc) {
-		if (**argv == '-')
-			switch (tolower(*++*argv)) {
-			case 'b':
-				no_blanks = 1;
-				break;
-			case 'i':
-				no_case = 1;
-				break;
-			case 'e':
-				sed_script = 1;
-				break;
-			case 'r':
-				re_sync = atoi(*argv + 1);
-				break;
-			case 'l':
-				lookahead = atoi(*argv + 1);
-				break;
-			default:
-				break;
-			}
-		else if (newfilename) {
-			fprintf(stderr, "Usage: diff [-b -i -e -rnum] oldfile newfile\n");
-			exit(1);
-		} else if (oldfilename)
-			newfilename = *argv;
-		else
-			oldfilename = *argv;
+	while ((opt = getopt(argc, argv, "bier:l:")) != -1) {
+		switch (opt) {
+		case 'b':
+			no_blanks = 1;
+			break;
+		case 'i':
+			no_case = 1;
+			break;
+		case 'e':
+			sed_script = 1;
+			break;
+		case 'r':
+			re_sync = atoi(optarg);
+			break;
+		case 'l':
+			lookahead = atoi(optarg);
+			break;
+		default:
+			errflag = 1;
+			break;
+		}
 	}
+	if (errflag || argc - optind != 2) {
+		usage(argv[0]);
+		exit(1);
+	}
+
+	oldfilename = argv[optind++];
+	newfilename = argv[optind++];
 
 	diff(oldfilename, newfilename);
 
