@@ -1,5 +1,5 @@
 /*
- *  $Id: tdf.c,v 1.10 2014/09/18 13:32:01 urs Exp $
+ *  $Id: tdf.c,v 1.11 2014/09/18 13:33:26 urs Exp $
  *
  *  A text file differencer
  */
@@ -35,12 +35,12 @@ static void diff(const char *oldfilename, const char *newfilename);
 static void resync(LINE *first, LINE *second);
 static int match(LINE *a, LINE *b);
 static int equal(const LINE *a, const LINE *b);
-static void discard(FD *file, const LINE *line);
+static void discard(FD *file, const LINE *to);
 static LINE *nextline(FD *file);
 static LINE *fgetline(FD *file);
 static void report(const LINE *del, const LINE *add);
-static void deleted(const LINE *line);
-static void added(const LINE *line);
+static void deleted(const LINE *to);
+static void added(const LINE *to);
 
 static FD oldfile = { 0, NULL, NULL, NULL };
 static FD newfile = { 0, NULL, NULL, NULL };
@@ -209,16 +209,16 @@ static int equal(const LINE *a, const LINE *b)
 		return !strcmp(a->text, b->text);
 }
 
-static void discard(FD *file, const LINE *line)
+static void discard(FD *file, const LINE *to)
 {
-	LINE *temp, *next;
+	LINE *line, *next;
 
-	for (temp = file->root; temp != line; temp = next) {
-		next = temp->next;
-		free(temp);
+	for (line = file->root; line != to; line = next) {
+		next = line->next;
+		free(line);
 		file->line_count++;
 	}
-	file->root = file->at = temp;
+	file->root = file->at = line;
 }
 
 static LINE *nextline(FD *file)
@@ -279,18 +279,18 @@ static void report(const LINE *del, const LINE *add)
 	added(add);
 }
 
-static void deleted(const LINE *line)
+static void deleted(const LINE *to)
 {
-	LINE *temp;
+	LINE *line;
 
-	for (temp = oldfile.root; temp != line; temp = temp->next)
-		printf("< %s", temp->text);
+	for (line = oldfile.root; line != to; line = line->next)
+		printf("< %s", line->text);
 }
 
-static void added(const LINE *line)
+static void added(const LINE *to)
 {
-	LINE *temp;
+	LINE *line;
 
-	for (temp = newfile.root; temp != line; temp = temp->next)
-		printf("> %s", temp->text);
+	for (line = newfile.root; line != to; line = line->next)
+		printf("> %s", line->text);
 }
