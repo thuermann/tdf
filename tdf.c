@@ -1,5 +1,5 @@
 /*
- *  $Id: tdf.c,v 1.9 2012/05/01 06:05:27 urs Exp $
+ *  $Id: tdf.c,v 1.10 2014/09/18 13:32:01 urs Exp $
  *
  *  A text file differencer
  */
@@ -37,7 +37,7 @@ static int match(LINE *a, LINE *b);
 static int equal(const LINE *a, const LINE *b);
 static void discard(FD *file, const LINE *line);
 static LINE *nextline(FD *file);
-static LINE *getline(FD *file);
+static LINE *fgetline(FD *file);
 static void report(const LINE *del, const LINE *add);
 static void deleted(const LINE *line);
 static void added(const LINE *line);
@@ -225,16 +225,16 @@ static LINE *nextline(FD *file)
 {
 	if (file->at) {
 		if (!file->at->next)
-			file->at->next = getline(file);
+			file->at->next = fgetline(file);
 		return file->at = file->at->next;
 	} else if (!file->root) {
-		file->root = file->at = getline(file);
+		file->root = file->at = fgetline(file);
 		return file->at;
 	} else
 		return NULL;
 }
 
-static LINE *getline(FD *file)
+static LINE *fgetline(FD *file)
 {
 	LINE *line;
 
